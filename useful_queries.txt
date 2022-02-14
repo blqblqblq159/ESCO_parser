@@ -1,0 +1,11 @@
+:auto LOAD CSV WITH HEADERS FROM 'file:///expanded_title_uri_skills.csv' AS row
+CALL {
+WITH row
+MERGE (a:Occupation {uri:row.uri, title:row.job_title})
+FOREACH( i in CASE WHEN toBoolean(row.essential) THEN [1] ELSE [] END |
+    MERGE (b:skill {name:row.skill})
+    MERGE (a)-[:REQUIRES_ESSENTIAL_SKILL]->(b))
+FOREACH( i in CASE WHEN toBoolean(row.essential) THEN [] ELSE [1] END |
+    MERGE (c:skill {name:row.skill})
+    MERGE (a)-[:REQUIRES_OPTIONAL_SKILL]->(c))
+} IN TRANSACTIONS
