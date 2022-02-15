@@ -1,3 +1,5 @@
+# ingest 'epanded_title_uri_skills,csv' into neo4j
+
 :auto LOAD CSV WITH HEADERS FROM 'file:///expanded_title_uri_skills.csv' AS row
 CALL {
 WITH row
@@ -9,3 +11,22 @@ FOREACH( i in CASE WHEN toBoolean(row.essential) THEN [] ELSE [1] END |
     MERGE (c:skill {name:row.skill})
     MERGE (a)-[:REQUIRES_OPTIONAL_SKILL]->(c))
 } IN TRANSACTIONS
+
+# create weighted 'REQUIRES_SKILL' relation for optional skills
+
+MATCH (a)-[:REQUIRES_OPTIONAL_SKILL]->(b)
+MERGE (a)-[:REQUIRES_SKILL {weight:1}]->(b)
+
+#create weighted 'REQUIRES_SKILL' relation for essential skills
+
+MATCH (a)-[:REQUIRES_ESSENTIAL_SKILL]->(b)
+MERGE (a)-[:REQUIRES_SKILL {weight:2}]->(b)
+
+
+# create weighted 'CO_SKILL' relation, this relation will be used in the node2vec algorithm
+
+MATCH (a)<-[d:REQUIRES_SKILL]-()-[c:REQUIRES_SKILL]->(b)
+WITH a,b,d.weight*c.weight as total_weight
+MERGE (a)-[e:CO_SKILL]->(b)
+ON CREATE SET e.weight = total_weight
+ON MATCH SET e.weight = e.weight + total_weight
