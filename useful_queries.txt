@@ -6,27 +6,18 @@ WITH row
 MERGE (a:Occupation {uri:row.uri, title:row.job_title})
 FOREACH( i in CASE WHEN toBoolean(row.essential) THEN [1] ELSE [] END |
     MERGE (b:skill {name:row.skill})
-    MERGE (a)-[:REQUIRES_ESSENTIAL_SKILL]->(b))
+    MERGE (a)-[:REQUIRES_SKILL {weight:2}]->(b))
 FOREACH( i in CASE WHEN toBoolean(row.essential) THEN [] ELSE [1] END |
     MERGE (c:skill {name:row.skill})
-    MERGE (a)-[:REQUIRES_OPTIONAL_SKILL]->(c))
+    MERGE (a)-[:REQUIRES_SKILL {weight:1}]->(c))
 } IN TRANSACTIONS
 
-# create weighted 'REQUIRES_SKILL' relation for optional skills
+# create person nodes in the graph and link them with the skills they have
 
-MATCH (a)-[:REQUIRES_OPTIONAL_SKILL]->(b)
-MERGE (a)-[:REQUIRES_SKILL {weight:1}]->(b)
-
-#create weighted 'REQUIRES_SKILL' relation for essential skills
-
-MATCH (a)-[:REQUIRES_ESSENTIAL_SKILL]->(b)
-MERGE (a)-[:REQUIRES_SKILL {weight:2}]->(b)
-
-
-# create weighted 'CO_SKILL' relation, this relation will be used in the node2vec algorithm
-
-MATCH (a)<-[d:REQUIRES_SKILL]-()-[c:REQUIRES_SKILL]->(b)
-WITH a,b,d.weight*c.weight as total_weight
-MERGE (a)-[e:CO_SKILL]->(b)
-ON CREATE SET e.weight = total_weight
-ON MATCH SET e.weight = e.weight + total_weight
+:auto LOAD CSV WITH HEADERS FROM 'file:///expanded_df_with_skills.csv' AS row
+CALL {
+WITH row
+    MERGE (a:Person {urn:row.urn})
+    MERGE (b:skill {name:row.skill})
+    MERGE (a)-[:HAS_SKILL {weight:1}]->(b)
+} IN TRANSACTIONS
