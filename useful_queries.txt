@@ -1,4 +1,4 @@
-# ingest 'epanded_title_uri_skills,csv' into neo4j
+# ingest 'expanded_title_uri_skills,csv' into neo4j. This gives us a linked representation of the occupations and associated skills in the ESCO dataset
 
 :auto LOAD CSV WITH HEADERS FROM 'file:///expanded_title_uri_skills.csv' AS row
 CALL {
@@ -12,7 +12,7 @@ FOREACH( i in CASE WHEN toBoolean(row.essential) THEN [] ELSE [1] END |
     MERGE (a)-[:REQUIRES_SKILL {weight:1}]->(c))
 } IN TRANSACTIONS
 
-# create person nodes in the graph and link them with the skills they have
+# create person nodes in the graph and link them with the ESCO skills they have
 
 :auto LOAD CSV WITH HEADERS FROM 'file:///expanded_df_with_skills.csv' AS row
 CALL {
