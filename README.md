@@ -15,3 +15,16 @@ Assuming a person has some subset of skills from the ESCO_dataset, recommend oth
 - calculating the distance matrix could take a long time (for me it took some 15 minutes) as it calculates all the pairwise distances between the ~15k skill embeddings, so about 225 million distances have to be calculated. But after this is done, we have a lookup table ready.
 - It is recommended that you write distance_mat to file, so that you never have to recalculate it later. Note that this file will take up about 2GB memory.
 
+# job recommender
+
+We randomly assign people from the dataset 'New_LinkedIn_users.csv' (in folder data) skills from the ESCO dataset based on their job history. From this linked dataset, we implement 2 recommendation patterns:
+1. for each person, we predict which ESCO occupations they are likely to be proficient at.
+2. for each ESCO occupation, we predict which people in our dataset are likely to be proficient at this occupation
+
+## how to run the notebook
+
+1. local neo4j database
+- We use the same database as in the skill recommender notebook.
+
+2. Run the notebook
+- There's no special distance calculation here, The node2vec algorithm may take a while to run, but other than that everything should be fine.
