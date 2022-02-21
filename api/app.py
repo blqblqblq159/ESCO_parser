@@ -1,5 +1,5 @@
 import numpy as np
-from flask import Flask
+from flask import Flask, request
 import pandas as pd
 import json
 app = Flask(__name__)
@@ -11,7 +11,7 @@ with open('distance_matrix.npy','rb') as f:
 embed_df = pd.read_csv('skill_embed.csv')
 init_sort = pd.read_csv('initial_skill_sort.csv')
 
-#make some functions some functions
+#make some functions
 def get_id(skill):
     for i,skill_name in enumerate(embed_df['name']):
         if skill_name == skill:
@@ -35,25 +35,26 @@ def sort_by_total_distance(skill_list):
     return top_distances, idx
 
 
-@app.route('/')
+@app.route('/',methods=['GET'])
 def return_init():
     names = list(init_sort['name'])
     weights = list(init_sort['weight'])
-    transposed = {}
+    transposed = []
     for a,b in zip(names,weights):
-        transposed[a] = b
+        transposed.append({a:b})
     return json.dumps(transposed)
 
-@app.route('/skills/<skills>')
-def return_closest_skills(skills):
-    skills = [x.strip() for x in skills.split(',')]
+@app.route('/skills',methods=['POST','GET'])
+def return_closest_skills():
+    skills = json.loads(request.data.decode('utf-8'))
     for skill in skills:
         print(skill)
     dists, idx = sort_by_total_distance(skills)
     skills = list(embed_df['name'][idx])
-    transposed = {}
+    transposed = []
     for a,b in zip(skills,dists):
-        transposed[a] = b
+        transposed.append({a:b})
     return json.dumps(transposed)
+    
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
