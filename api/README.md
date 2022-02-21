@@ -20,3 +20,7 @@ The dictionary contains the skill as a key and the importance as a value. The im
 a POST request on localhost:5000/skills will yield a sorted list of the skills in the ESCO dataset, with the most recommended skill first, and the least recommended skill last.
 The post request requires an input list, containing a string of every skill that is already allocated.
 It then again returns a sorted list of dictionaries. the key of every dictionary contains the skill (as a string) and the value of every dictionary contains the total distance of the skill to the skill that are already allocated (lower is better)
+
+## example
+
+When the API (app.py) is running, you can run the script api_test.py. This gives an example of both previously detailed functionalities.
