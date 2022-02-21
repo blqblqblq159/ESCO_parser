@@ -1,3 +1,8 @@
+# Requirements
+
+This API requires the distance_matrix.npy in the api folder.
+This distance matrix is calculated in the skill_recommender/skill_recommender.ipynb notebook.
+
 # API for skill recommendations
 
 The API will run on localhost:5000
